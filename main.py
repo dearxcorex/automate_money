@@ -11,9 +11,9 @@ file_path = "data/money.xlsx"
 #create dict 
 
 team = {
-    "member1": {"name":"นายภูวกฤต  พลชิงชัย","position":"นตป.ก2","allowance":350},
-    "member2": {"name":"นางสาวธันยพัฒน์ ภาดาเพิ่มผลสมบัติ","position":"นตป.ก1","allowance":350},
-    "member3":{ "name":"นายธนกฤต ชื่นฉิมพลี","position":"นตป.ก1","allowance":300},
+    "member1": {"name":"นายภูวกฤต  พลชิงชัย","position":"นตป.ก2","allowance":350,"total_allowance":0},
+    "member2": {"name":"นางสาวธันยพัฒน์ ภาดาเพิ่มผลสมบัติ","position":"นตป.ก1","allowance":350,"total_allowance":0},
+    "member3":{ "name":"นายธนกฤต ชื่นฉิมพลี","position":"นตป.ก1","allowance":300,"total_allowance":0},
 }
 
 
@@ -33,20 +33,33 @@ def thai_to_gregorian(thai_date):
 
 
 
-def update_excel(file_path, order_num, date_string,start_day,stop_day,provice,start_time):
+def update_excel(file_path,name_1,name_2,name_3, order_num, date_string,start_day,stop_day,provice,start_time):
 
     # Load the workbook and select the sheet
     workbook = load_workbook(file_path)
     sheet_1 = workbook['เบิกจ่าย']
     sheet_2 = workbook['หลักฐาน'] 
-    print(sheet_2["A1"].value)
     # Update Thai mounth and year
     now = datetime.now()
     thai_month_year = format_date(now, "MMMM yyyy", locale="th_TH")
     thai_year = str(int(thai_month_year.split()[-1]) + 543)
     thai_month_year = f"     {thai_month_year.split()[0]} {thai_year}"
     sheet_1["H7"].value = thai_month_year
+    #หลักฐาน sheet 
+    wording_sheet2 = f"ประกอบใบเบิกค่าใช้จ่ายในการเดินทางของ  {name_1}    และคณะ    ลงวันที่              {thai_month_year}"
+    sheet_2["A3"].value =  wording_sheet2
+    sheet_2["B6"].value = name_1
+    sheet_2["C6"].value = team["member1"]["position"]
 
+    sheet_2["B7"].value = name_2
+    sheet_2["C7"].value = team["member2"]["position"]
+
+    sheet_2["B8"].value = name_3
+    sheet_2["C8"].value = team["member3"]["position"]
+
+
+
+    
     # Order number
     order_text = (
         f"อนุมัติ ผภภ. 23  ปฏิบัติการแทน เลขาธิการ กสทช ที่ สทช 2203.3/{order_num}"
@@ -93,14 +106,21 @@ def update_excel(file_path, order_num, date_string,start_day,stop_day,provice,st
     sheet_1["D21"] = days
     sheet_1["F21"] = hours
     sheet_1["H21"] = minutes
+    #allowance calculate
+    if days >= 1 and hours >= 8:
+        for member in team.values():
+            member["total_allowance"] = member["allowance"] * (days + 1)
+            print(member["total_allowance"])
 
+         
 order_num =123
 date_string = "12/08/2567"
 start_day = "20"
-stop_day = "21"
+stop_day = "22"
 provice = 'บุรีรัมย์'
 start_time = "09:00"
 stop_time = "17:45"
-
-
-update_excel(file_path,order_num,date_string,start_day,stop_day,provice,start_time)
+name_1 = team["member1"]["name"]
+name_2 = team["member2"]["name"]
+name_3 = team["member3"]["name"]
+update_excel(file_path,name_1,name_2,name_3,order_num,date_string,start_day,stop_day,provice,start_time)
